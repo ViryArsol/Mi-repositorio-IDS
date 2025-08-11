@@ -1,0 +1,143 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace COPPEL
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string connectionString = "Data Source=USER8120-PC\\SQLEXPRESS;Initial Catalog=COPPEL;Integrated Security=True;Encrypt=False";
+            string query = "INSERT INTO empleado (ID_empleado, nombre_empleado, apellido_paterno, apellido_materno, fecha_nacimiento, ID_centro, ID_puesto, directivo) VALUES (@valor1, @valor2, @valor3, @valor4, @valor5, @valor6, @valor7, @valor8)";
+
+            // Validación de datos
+            if (string.IsNullOrEmpty(textBox1.Text) || string.IsNullOrEmpty(textBox2.Text) || string.IsNullOrEmpty(textBox3.Text) || string.IsNullOrEmpty(textBox4.Text) || string.IsNullOrEmpty(textBox5.Text) || string.IsNullOrEmpty(textBox6.Text) || string.IsNullOrEmpty(textBox7.Text) || string.IsNullOrEmpty(textBox8.Text))
+            {
+                MessageBox.Show("Por favor, complete todos los campos.");
+                return;
+            }
+
+            // Verificar si el valor de la clave primaria ya existe
+            string queryVerificar = "SELECT * FROM empleado WHERE ID_empleado = @valor1";
+            string valor1 = textBox1.Text;
+            string valor2 = textBox2.Text;
+            string valor3 = textBox3.Text;
+            string valor4 = textBox4.Text;
+            string valor5 = textBox5.Text;
+            string valor6 = textBox6.Text;
+            string valor7 = textBox7.Text;
+            string valor8 = textBox8.Text;
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                // Verificar si el valor de la clave primaria ya existe
+                SqlCommand commandVerificar = new SqlCommand(queryVerificar, connection);
+                commandVerificar.Parameters.AddWithValue("@valor1", valor1);
+                SqlDataReader reader = commandVerificar.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    MessageBox.Show("El valor de la clave primaria ya existe.");
+                    return;
+                }
+
+                reader.Close();
+
+                // Insertar datos
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@valor1", valor1);
+                command.Parameters.AddWithValue("@valor2", valor2);
+                command.Parameters.AddWithValue("@valor3", valor3);
+                command.Parameters.AddWithValue("@valor4", valor4);
+                command.Parameters.AddWithValue("@valor5", valor5);
+                command.Parameters.AddWithValue("@valor6", valor6);
+                command.Parameters.AddWithValue("@valor7", valor7);
+                command.Parameters.AddWithValue("@valor8", valor8);
+                command.ExecuteNonQuery();
+            }
+
+            MessageBox.Show("Datos insertados correctamente.");
+        }
+
+        private void label6_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void label9_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string connectionString = "Data Source=USER8120-PC\\SQLEXPRESS;Initial Catalog=COPPEL;Integrated Security=True;Encrypt=False";
+            string query = "SELECT * FROM empleado";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    SqlCommand command = new SqlCommand(query, connection);
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    dataGridView1.Rows.Clear(); // Limpia las filas del DataGridView
+
+                    // Agrega columnas al DataGridView
+                    dataGridView1.Columns.Clear();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        dataGridView1.Columns.Add(reader.GetName(i), reader.GetName(i));
+                    }
+
+                    while (reader.Read())
+                    {
+                        DataGridViewRow row = new DataGridViewRow();
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            row.Cells.Add(new DataGridViewTextBoxCell { Value = reader[i] });
+                        }
+                        dataGridView1.Rows.Add(row);
+                    }
+
+                    reader.Close();
+                    connection.Close(); // Cierra la conexión
+                }
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show("Error al ejecutar la consulta: " + ex.Message);
+            }
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+        }
+    }
+}
